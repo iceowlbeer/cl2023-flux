@@ -6,7 +6,7 @@ metadata:
 spec:
   interval: 1m0s
   ref:
-    branch: master
+    branch: flux2
   secretRef:
     name: flux-system
-  url: URL
+  url: https://github.com/iceowlbeer/cl2023-flux

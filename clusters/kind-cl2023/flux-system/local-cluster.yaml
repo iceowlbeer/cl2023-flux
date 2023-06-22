@@ -5,7 +5,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m0s
-  path: ./clusters/local
+  path: ./clusters/kind-cl2023
   prune: true
   sourceRef:
     kind: GitRepository
