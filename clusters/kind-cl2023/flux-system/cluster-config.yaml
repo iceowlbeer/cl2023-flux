@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-config
+  namespace: flux-system
+data:
+  keycloakhost: idm-local.local.com
+  keycloakdbhost: mycluster.mysql.svc.cluster.local
+  tektonhost: tekton.local.com
+  grafanahost: grafana.local.com
+  weavehost: weaveui.local.com
+  imagepolicy: $imagepolicy
