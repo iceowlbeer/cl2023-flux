@@ -1,0 +1,99 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: prometheus-stack
+  namespace: monitoring
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: kube-prometheus-stack
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-stack
+        namespace: flux-system
+      interval: 1m
+  values:
+    grafana:
+      ingress:
+        enabled: true
+        # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
+        # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
+        ingressClassName: nginx
+        # Values can be templated
+        annotations: 
+          nginx.ingress.kubernetes.io/rewrite-target: /
+          kubernetes.io/ingress.class: nginx
+          # kubernetes.io/ingress.class: nginx
+          # kubernetes.io/tls-acme: "true"
+        labels: {}
+        path: /
+
+        # pathType is only for k8s >= 1.1=
+        pathType: Prefix
+
+        hosts:
+          - ${grafanahost}
+        ## Extra paths to prepend to every host configuration. This is useful when working with annotation based services.
+        extraPaths: []
+        # - path: /*
+        #   backend:
+        #     serviceName: ssl-redirect
+        #     servicePort: use-annotation
+        ## Or for k8s > 1.19
+        # - path: /*
+        #   pathType: Prefix
+        #   backend:
+        #     service:
+        #       name: ssl-redirect
+        #       port:
+        #         name: use-annotation
+
+
+        tls: []
+        #  - secretName: chart-example-tls
+        #    hosts:
+        #      - chart-example.local
+      image:
+        tag: 9.5.3
+      # for high availability
+      headlessService: true
+      #service:
+      #  enabled: true
+      #  type: LoadBalancer
+      persistence:
+        type: pvc
+        enabled: true
+        #storageClassName: oci
+        accessModes:
+          - ReadWriteOnce
+        size: 10Gi
+      sidecar:
+        alerts:
+          enabled: true
+          labelValue: "1"
+      #extraVolumeMounts:
+      #- mountPath: /etc/grafana/provisioning/alerting
+      #  name: grafana-alerting
+      #  readOnly: false
+      #extraContainerVolumes: 
+      #- name: grafana-alerting
+      #  configMap:
+      #    defaultMode: 420
+      #    name: grafana-alerting
+    
+    #Disbale rootFS in local System (only Docker)
+    prometheus-node-exporter:
+      hostRootFsMount:
+        enabled: false  
+
+    prometheus:
+      prometheusSpec:
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              #storageClassName: oci
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 10Gi
